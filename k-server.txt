@@ -1,0 +1,407 @@
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+#include <X11/Xatom.h>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*X variables */
+Display *displays_ptr;
+char *displayName = NULL;
+int screen_num;
+Window win;
+GC gc, gc_yellow, gc_red, gc_blue,gc_yellow_thick,gc_red_thick,gc_blue_thick;
+unsigned long valuemask = 0;
+XGCValues gc_values, gc_yellow_values, gc_red_values, gc_blue_values;
+Colormap color_map;
+XColor tmp_color1, tmp_color2;
+int clicks = 1;
+int xx;
+int yx;
+int min=0;
+int min2=0;
+int i,j,k,t;
+XColor color1, color2;
+Colormap color_map;
+unsigned int width = 700, height = 700;
+XEvent report;
+int temp=0;
+int infinity=777777;
+int globalMin=777777;
+int globalI,globalJ, globalK;
+float comp;
+struct server
+{
+	int m;
+	int n;
+};
+struct request
+{
+	int p;
+	int q;
+};
+struct req_parent
+{
+	int r;
+	int s;
+	int t;
+	int u;
+};
+struct server ser[3];
+struct request req[50];
+
+int counter=1;
+int dist_1;
+int dist_2;
+int dist_3;
+int dist_4;
+int dist_5;
+int dist_6;
+int reqs=1;
+int main(int argc, char *argv[])
+{
+	ser[0].m=30;
+	ser[0].n=30;
+	ser[1].m=670;
+	ser[1].n=30;
+	ser[2].m=350;
+	ser[2].n=470;
+
+	displays_ptr=XOpenDisplay(displayName);
+	screen_num=DefaultScreen(displays_ptr);
+	color_map  = XDefaultColormap( displays_ptr, screen_num );
+	win=XCreateSimpleWindow(displays_ptr,RootWindow(displays_ptr, screen_num),0,0,
+			width, height, 5,BlackPixel(displays_ptr,screen_num), WhitePixel(displays_ptr, screen_num));
+	XMapWindow(displays_ptr, win);
+	XSetStandardProperties(displays_ptr,win,"Window | 1.0","1.0",None,NULL,0,NULL);
+	XSelectInput(displays_ptr, win, ExposureMask|ButtonPressMask|StructureNotifyMask);
+	gc = XCreateGC( displays_ptr, win, valuemask, &gc_values);
+	XSetForeground( displays_ptr, gc, BlackPixel( displays_ptr, screen_num ) );
+	XSetLineAttributes( displays_ptr, gc, 4, LineSolid, CapRound, JoinRound);
+
+	gc_yellow = XCreateGC( displays_ptr, win, valuemask, &gc_yellow_values);
+	XSetLineAttributes(displays_ptr, gc_yellow, 1, LineSolid,CapRound, JoinRound);
+	if( XAllocNamedColor( displays_ptr, color_map, "yellow",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color yellow\n"); exit(-1);}
+	else
+		XSetForeground( displays_ptr, gc_yellow, tmp_color1.pixel );
+	gc_red = XCreateGC( displays_ptr, win, valuemask, &gc_red_values);
+	XSetLineAttributes( displays_ptr, gc_red, 1, LineSolid, CapRound, JoinRound);
+	if( XAllocNamedColor( displays_ptr, color_map, "red",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color red\n"); exit(-1);
+	}
+	else
+		XSetForeground( displays_ptr, gc_red, tmp_color1.pixel );
+	gc_blue = XCreateGC( displays_ptr, win, valuemask, &gc_blue_values);
+	if( XAllocNamedColor( displays_ptr, color_map, "blue",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color blue\n"); exit(-1);
+	}
+	else
+		XSetForeground( displays_ptr, gc_blue, tmp_color1.pixel );
+	XClearWindow(displays_ptr, win);
+	XMapRaised(displays_ptr, win);
+
+	gc_yellow_thick = XCreateGC( displays_ptr, win, valuemask, &gc_yellow_values);
+	XSetLineAttributes(displays_ptr, gc_yellow_thick, 3, LineSolid,CapRound, JoinRound);
+	if( XAllocNamedColor( displays_ptr, color_map, "yellow",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color yellow\n"); exit(-1);
+	}
+	else
+		XSetForeground( displays_ptr, gc_yellow_thick, tmp_color1.pixel );
+	gc_red_thick = XCreateGC( displays_ptr, win, valuemask, &gc_red_values);
+	XSetLineAttributes( displays_ptr, gc_red_thick, 3, LineSolid, CapRound, JoinRound);
+	if( XAllocNamedColor( displays_ptr, color_map, "red",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color red\n"); exit(-1);
+	}
+	else
+		XSetForeground( displays_ptr, gc_red_thick, tmp_color1.pixel );
+	gc_blue_thick = XCreateGC( displays_ptr, win, valuemask, &gc_blue_values);
+	XSetLineAttributes(displays_ptr, gc_blue_thick, 3, LineSolid,CapRound, JoinRound);
+	if( XAllocNamedColor( displays_ptr, color_map, "blue",
+			&tmp_color1, &tmp_color2 ) == 0 )
+	{
+		printf("failed to get color blue\n"); exit(-1);
+	}
+	else
+		XSetForeground( displays_ptr, gc_blue_thick, tmp_color1.pixel );
+	XClearWindow(displays_ptr, win);
+	XMapRaised(displays_ptr, win);
+
+
+	while(1)
+	{
+
+		XNextEvent(displays_ptr, &report);
+
+		switch(report.type)
+		{
+		case Expose:
+			XFillArc( displays_ptr, win, gc_red, 350-20,470-20,20,20, 0, 360*64);
+			XFillArc( displays_ptr, win, gc_blue,670-20,30-20 ,20,20, 0, 360*64);
+			XFillArc( displays_ptr, win, gc_yellow,30-20,30-20,20,20, 0, 360*64);
+
+			break;
+		case ConfigureNotify:
+			width = report.xconfigure.width;
+			height = report.xconfigure.height;
+			break;
+		case ButtonPress:
+			if(report.xbutton.button == Button1)
+			{
+				int x=report.xbutton.x,
+						y=report.xbutton.y;
+				req[clicks].p=x;
+				req[clicks].q=y;
+				clicks++;
+				dist_1=sqrt(pow(y-ser[0].n,2)+(pow(x-ser[0].m,2)));
+				dist_2=sqrt(pow(y-ser[1].n,2)+(pow(x-ser[1].m,2)));
+				dist_3=sqrt(pow(y-ser[2].n,2)+(pow(x-ser[2].m,2)));
+
+				if(dist_1<dist_2 && dist_1<dist_3){
+					XDrawLine(displays_ptr,win,gc_yellow,ser[0].m,ser[0].n,x,y);
+					ser[0].m=x;
+					ser[0].n=y;
+					min+=dist_1;
+				}
+				else if(dist_2<dist_1 && dist_2<dist_3)
+				{
+					XDrawLine(displays_ptr,win,gc_blue,ser[1].m,ser[1].n,x,y);
+					ser[1].m=x;
+					ser[1].n=y;
+					min+=dist_2;
+				}
+				else if(dist_3<dist_1 && dist_3<dist_2)
+				{
+					XDrawLine(displays_ptr,win,gc_red,ser[2].m,ser[2].n,x,y);
+					ser[2].m=x;
+					ser[2].n=y;
+					min+=dist_3;
+				}
+				printf("Req: %d\n",clicks-1);
+				printf("Total Cost of Requests:%d\n",min);
+			}
+			else if(report.xbutton.button == Button3)
+			{
+				ser[0].m=30;
+				ser[0].n=30;
+				ser[1].m=670;
+				ser[1].n=30;
+				ser[2].m=350;
+				ser[2].n=470;
+				int cost[clicks][clicks][clicks][clicks];
+				for(reqs=1;reqs<clicks;reqs++)
+				{
+					for(i=0;i<clicks;i++)
+					{
+						for(j=0;j<clicks;j++)
+						{
+							for(k=0;k<clicks;k++)
+							{
+								cost[reqs][i][j][k]=infinity;
+							}
+						}
+					}
+				}
+				struct req_parent preq[clicks][clicks][clicks][clicks];
+				preq[1][1][0][0].r=0;
+				preq[1][1][0][0].s=0;
+				preq[1][1][0][0].t=0;
+				preq[1][1][0][0].u=0;
+				preq[1][0][1][0].r=0;
+				preq[1][0][1][0].s=0;
+				preq[1][0][1][0].t=0;
+				preq[1][0][1][0].u=0;
+				preq[1][0][0][1].r=0;
+				preq[1][0][0][1].s=0;
+				preq[1][0][0][1].t=0;
+				preq[1][0][0][1].u=0;
+				dist_1=sqrt(pow(req[1].q-ser[0].n,2)+(pow(req[1].p-ser[0].m,2)));
+				dist_2=sqrt(pow(req[1].q-ser[1].n,2)+(pow(req[1].p-ser[1].m,2)));
+				dist_3=sqrt(pow(req[1].q-ser[2].n,2)+(pow(req[1].p-ser[2].m,2)));
+				cost[1][1][0][0]=dist_1;
+				cost[1][0][1][0]=dist_2;
+				cost[1][0][0][1]=dist_3;
+
+				int gI, gJ, gK;
+				for(reqs=2;reqs<clicks;reqs++)
+				{
+					for(i=0;i<=reqs;i++)
+					{
+						for(j=0;j<=reqs;j++)
+						{
+							for(k=0;k<=reqs;k++)
+							{
+								int globalDist = 777777;
+
+								if(reqs!=i && reqs!=j && reqs!=k)
+								{
+									cost[reqs][i][j][k]= infinity;
+								}
+								else
+								{
+									for(t=0;t<reqs;t++)
+									{
+										if(cost[reqs-1][t][j][k]>0 && cost[reqs-1][t][j][k]<infinity)
+										{
+											if(t==0)
+											{
+												dist_4= cost[reqs-1][t][j][k]+ sqrt(pow(req[i].q-ser[0].n,2)+(pow(req[i].p-ser[0].m,2)));
+											}
+											else
+											{
+												dist_4=cost[reqs-1][t][j][k]+sqrt(pow(req[t].q-req[i].q,2)+(pow(req[t].p-req[i].p,2)));																}
+											if(dist_4 < globalDist)
+											{
+												globalDist=dist_4;
+												gI=t;
+												gJ=j;
+												gK=k;
+											}
+										}
+										if(cost[reqs-1][i][t][k]>0 && cost[reqs-1][i][t][k]<infinity)
+										{
+											if(t==0)
+											{
+												dist_5=cost[reqs-1][i][t][k]+sqrt(pow(req[j].q-ser[1].n,2)+(pow(req[j].p-ser[1].m,2)));
+											}
+											else
+											{
+												dist_5=cost[reqs-1][i][t][k]+sqrt(pow(req[t].q-req[j].q,2)+(pow(req[t].p-req[j].p,2)));
+											}
+											if(dist_5 < globalDist)
+											{
+												globalDist=dist_5;
+												gI=i;
+												gJ=t;
+												gK=k;}
+										}
+										if(cost[reqs-1][i][j][t]>0 && cost[reqs-1][i][j][t]<infinity)
+										{
+											if(t==0)
+											{
+												dist_6=cost[reqs-1][i][j][t]+sqrt(pow(req[k].q-ser[2].n,2)+(pow(req[k].p-ser[2].m,2)));
+											}
+											else
+											{
+												dist_6=cost[reqs-1][i][j][t]+sqrt(pow(req[t].q-req[k].q,2)+(pow(req[t].p-req[k].p,2)));
+											}
+											if(dist_6 < globalDist)
+											{
+												globalDist=dist_6;
+												gI=i;
+												gJ=j;
+												gK=t;
+											}
+										}
+									}
+									if(globalDist < 777777)
+									{
+										cost[reqs][i][j][k]=globalDist;
+										preq[reqs][i][j][k].r=reqs-1;
+										preq[reqs][i][j][k].s=gI;
+										preq[reqs][i][j][k].t=gJ;
+										preq[reqs][i][j][k].u=gK;
+									}
+								}
+							}
+						}
+					}
+				}
+
+				for(i=0;i<clicks;i++)
+				{
+					for(j=0;j<clicks;j++)
+					{
+						for(k=0;k<clicks;k++)
+						{
+							if(cost[clicks-1][i][j][k]<globalMin)
+							{
+								globalMin=cost[clicks-1][i][j][k];
+								globalI=i;
+								globalJ=j;
+								globalK=k;
+							}
+						}
+					}
+				}
+				int printer;
+				printer=clicks-1;
+				i=globalI;
+				j=globalJ;
+				k=globalK;
+				printf("Req: %d, Ser i: %d, Ser j: %d, Ser k: %d\n",printer,i,j,k);
+				printf("Optimal Cost: %d \n",cost[printer][i][j][k]);
+				comp=(float)min/cost[printer][i][j][k];
+				printf("Competitive Ration:%f\n",comp);
+
+
+				while(printer!=0)
+				{
+					if(printer==i)
+					{
+						int parentI=preq[printer][i][j][k].s;
+						if(parentI==0)
+						{
+							XDrawLine(displays_ptr,win,gc_yellow_thick,ser[0].m,ser[0].n,req[printer].p,req[printer].q);
+						}
+						else
+						{
+							XDrawLine(displays_ptr,win,gc_yellow_thick,req[printer].p,req[printer].q,req[parentI].p,req[parentI].q);
+						}
+					}
+					else if(printer==j)
+					{
+						int parentJ=preq[printer][i][j][k].t;
+						if(parentJ==0){
+							XDrawLine(displays_ptr,win,gc_blue_thick,ser[1].m,ser[1].n,req[printer].p,req[printer].q);
+						}
+						else
+						{
+							XDrawLine(displays_ptr,win,gc_blue_thick,req[printer].p,req[printer].q,req[parentJ].p,req[parentJ].q);
+						}
+					}
+					else if(printer==k)
+					{
+						int parentK=preq[printer][i][j][k].u;
+						if(parentK==0)
+						{
+							XDrawLine(displays_ptr,win,gc_red_thick,ser[2].m,ser[2].n,req[printer].p,req[printer].q);
+						}
+						else
+						{
+							XDrawLine(displays_ptr,win,gc_red_thick,req[printer].p,req[printer].q,req[parentK].p,req[parentK].q);
+						}
+					}
+					printf("Req: %d, Ser i: %d, Ser j: %d, Ser k: %d\n",printer,i,j,k);
+					int GlobalP=preq[printer][i][j][k].r;
+					globalI = preq[printer][i][j][k].s;
+					globalJ = preq[printer][i][j][k].t;
+					globalK = preq[printer][i][j][k].u;
+					printer = GlobalP;
+					i = globalI;
+					j = globalJ;
+					k = globalK;
+				}
+			}
+
+			break;
+		default:
+
+			break;
+		}
+	}
+	return 0;
+}
+
